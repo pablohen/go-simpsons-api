@@ -1,0 +1,339 @@
+basePath: /
+definitions:
+  models.APIIndex:
+    properties:
+      characters:
+        example: https://thesimpsonsapi.com/api/characters
+        type: string
+      episodes:
+        example: https://thesimpsonsapi.com/api/episodes
+        type: string
+      locations:
+        example: https://thesimpsonsapi.com/api/locations
+        type: string
+    type: object
+  models.CharacterDetail:
+    properties:
+      age:
+        type: integer
+      birthdate:
+        type: string
+      description:
+        type: string
+      first_appearance_ep:
+        $ref: '#/definitions/models.EpisodeDetail'
+      first_appearance_ep_id:
+        type: integer
+      first_appearance_sh_id:
+        type: integer
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      occupation:
+        type: string
+      phrases:
+        items:
+          type: string
+        type: array
+      portrait_path:
+        type: string
+      status:
+        type: string
+    type: object
+  models.CharacterListItem:
+    properties:
+      age:
+        type: integer
+      birthdate:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      occupation:
+        type: string
+      phrases:
+        items:
+          type: string
+        type: array
+      portrait_path:
+        type: string
+      status:
+        type: string
+    type: object
+  models.EpisodeBrief:
+    properties:
+      airdate:
+        type: string
+      episode_number:
+        type: integer
+      id:
+        type: integer
+      image_path:
+        type: string
+      name:
+        type: string
+      season:
+        type: integer
+      synopsis:
+        type: string
+    type: object
+  models.EpisodeDetail:
+    properties:
+      airdate:
+        type: string
+      description:
+        type: string
+      episode_number:
+        type: integer
+      id:
+        type: integer
+      image_path:
+        type: string
+      name:
+        type: string
+      season:
+        type: integer
+      synopsis:
+        type: string
+    type: object
+  models.LocationBrief:
+    properties:
+      id:
+        type: integer
+      image_path:
+        type: string
+      name:
+        type: string
+      town:
+        type: string
+      use:
+        type: string
+    type: object
+  models.LocationDetail:
+    properties:
+      description:
+        type: string
+      first_appearance_ep:
+        $ref: '#/definitions/models.EpisodeDetail'
+      first_appearance_ep_id:
+        type: integer
+      first_appearance_sh:
+        type: object
+      first_appearance_sh_id:
+        type: integer
+      id:
+        type: integer
+      image_path:
+        type: string
+      name:
+        type: string
+      town:
+        type: string
+      use:
+        type: string
+    type: object
+  models.PaginatedCharacters:
+    properties:
+      count:
+        type: integer
+      next:
+        type: string
+      pages:
+        type: integer
+      prev:
+        type: string
+      results:
+        items:
+          $ref: '#/definitions/models.CharacterListItem'
+        type: array
+    type: object
+  models.PaginatedEpisodes:
+    properties:
+      count:
+        type: integer
+      next:
+        type: string
+      pages:
+        type: integer
+      prev:
+        type: string
+      results:
+        items:
+          $ref: '#/definitions/models.EpisodeBrief'
+        type: array
+    type: object
+  models.PaginatedLocations:
+    properties:
+      count:
+        type: integer
+      next:
+        type: string
+      pages:
+        type: integer
+      prev:
+        type: string
+      results:
+        items:
+          $ref: '#/definitions/models.LocationBrief'
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: API support
+    url: https://thesimpsonsapi.com/
+  description: Mirrors https://thesimpsonsapi.com/api. JSON responses are proxied
+    from the upstream service; pagination next/prev URLs reference the upstream host.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://thesimpsonsapi.com/
+  title: The Simpsons API (proxied)
+  version: "1.0"
+paths:
+  /api:
+    get:
+      description: Returns links to the characters, episodes, and locations collection
+        endpoints.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIIndex'
+      summary: API index
+      tags:
+      - meta
+  /api/characters:
+    get:
+      description: Paginated list of characters (20 per page). Use the page query
+        parameter.
+      parameters:
+      - description: Page number (1-based)
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PaginatedCharacters'
+      summary: List characters
+      tags:
+      - characters
+  /api/characters/{id}:
+    get:
+      description: Full character record including description and optional nested
+        first-appearance episode.
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CharacterDetail'
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Get character by ID
+      tags:
+      - characters
+  /api/episodes:
+    get:
+      description: Paginated list of episodes (20 per page).
+      parameters:
+      - description: Page number (1-based)
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PaginatedEpisodes'
+      summary: List episodes
+      tags:
+      - episodes
+  /api/episodes/{id}:
+    get:
+      description: Episode detail including long description.
+      parameters:
+      - description: Episode ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EpisodeDetail'
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Get episode by ID
+      tags:
+      - episodes
+  /api/locations:
+    get:
+      description: Paginated list of Springfield locations (20 per page).
+      parameters:
+      - description: Page number (1-based)
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PaginatedLocations'
+      summary: List locations
+      tags:
+      - locations
+  /api/locations/{id}:
+    get:
+      description: Location detail including description and optional nested appearances.
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LocationDetail'
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Get location by ID
+      tags:
+      - locations
+swagger: "2.0"
